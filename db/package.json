@@ -1,0 +1,17 @@
+{
+  "name": "db",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@types/pg": "^8.20.0",
+    "pg": "^8.22.0",
+    "redis": "^6.0.1"
+  }
+}

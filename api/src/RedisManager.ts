@@ -1,9 +1,11 @@
 import { createClient, type RedisClientType } from "redis";
+import type { MessageToEngine } from "./types/to";
+import type { MessageFromOrderbook } from "./types";
 
 
 
 export class RedisManager{
-    private client : RedisClientType:
+    private client : RedisClientType;
     private publisher: RedisClientType;
     private static instance: RedisManager;
 
