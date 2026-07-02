@@ -1,8 +1,14 @@
-import type { CANCEL_ORDER, CREATE_ORDER, GET_DEPTH, GET_OPEN_ORDERS, ON_RAMP } from "./index"
 
 
+export const CREATE_ORDER = "CREATE_ORDER";
+export const CANCEL_ORDER = "CANCEL_ORDER";
+export const ON_RAMP = "ON_RAMP";
 
-export type MessageToEngine = {
+export const GET_DEPTH = "GET_DEPTH";
+export const GET_OPEN_ORDERS = "GET_OPEN_ORDERS";
+
+
+export type MessageFromApi={
     type: typeof CREATE_ORDER,
     data:{
         market: string,
@@ -20,19 +26,19 @@ export type MessageToEngine = {
 } | {
     type: typeof ON_RAMP,
     data:{
-        amount:string,
-        userId : string,
-        txnId: string
+        amount: string,
+        userId: string,
+        txnId: string,
     }
 } | {
     type: typeof GET_DEPTH,
-    data:[
+    data: {
         market: string,
-    ]
+    }
 } | {
     type: typeof GET_OPEN_ORDERS,
     data:{
-        userId: string,
+        userId:string,
         market: string,
     }
 }
