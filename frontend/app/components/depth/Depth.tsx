@@ -14,7 +14,8 @@ export const Depth=(
 )=>{
     const [bids,setBids] = useState<[string,string][]>();
     const [asks,setAsks] = useState<[string,string][]>();
-    const[price,setPrice] = useState<string>();
+    const [price,setPrice] = useState<string>();
+    const [baseAsset, quoteAsset] = market.split("_");
 
     useEffect(()=>{
         SignalingManager.getInstance().registerCallback("depth",(data:any)=> {
@@ -73,8 +74,15 @@ export const Depth=(
             });
         },`DEPTH-${market}`);
 
+        SignalingManager.getInstance().registerCallback("ticker", (data: any) => {
+            if (data.lastPrice) {
+                setPrice(data.lastPrice);
+            }
+        }, `TICKER-DEPTH-${market}`);
+
         SignalingManager.getInstance().sendMessage({
-            "method":"SUBSCRIBE","params":[`depth@${market}`]
+            "method": "SUBSCRIBE",
+            "params": [`depth@${market}`, `ticker.${market}`]
         });
 
         getDepth(market).then(d=> {
@@ -85,16 +93,43 @@ export const Depth=(
         getTicker(market).then(t => setPrice(t.lastPrice));
 
         return()=>{
-            SignalingManager.getInstance().sendMessage({"method":"UNSUBSCRIBE","params":[`depth@${market}`]});
+            SignalingManager.getInstance().sendMessage({"method":"UNSUBSCRIBE","params":[`depth@${market}`, `ticker.${market}`]});
             SignalingManager.getInstance().deRegisterCallback("depth", `DEPTH-${market}`);
+            SignalingManager.getInstance().deRegisterCallback("ticker", `TICKER-DEPTH-${market}`);
     }
   },[])
 
-  return <div>
-    {/* <TableHeader/> */}
-    {asks && <AskTable asks={asks}/>}
-    {price && <div>{price}</div>}
-    {bids &&  <BidTable bids={bids} />}
-    
+  useEffect(() => {
+      if (bids && bids.length > 0 && asks && asks.length > 0) {
+          const highestBid = Number(bids[0][0]);
+          const lowestAsk = Number(asks[0][0]);
+          setPrice(((highestBid + lowestAsk) / 2).toFixed(1));
+      } else if (bids && bids.length > 0) {
+          setPrice(bids[0][0]);
+      } else if (asks && asks.length > 0) {
+          setPrice(asks[0][0]);
+      }
+  }, [bids, asks]);
+
+  return <div className="flex flex-col w-full h-full text-slate-300">
+    <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2 py-1.5 border-b border-slate-800/60 mb-1">
+      <div className="w-1/3 text-left">Price ({quoteAsset})</div>
+      <div className="w-1/3 text-right">Size ({baseAsset})</div>
+      <div className="w-1/3 text-right">Total ({baseAsset})</div>
     </div>
+    
+    <div className="flex flex-col overflow-hidden">
+      {asks && <AskTable asks={asks}/>}
+    </div>
+    
+    {price && (
+      <div className="text-md font-bold text-center my-2.5 text-white border-y border-slate-800/80 py-2 bg-slate-900/40 font-mono tracking-wide">
+        {price}
+      </div>
+    )}
+    
+    <div className="flex flex-col overflow-hidden">
+      {bids &&  <BidTable bids={bids} />}
+    </div>
+  </div>
 }

@@ -24,14 +24,14 @@ export class RedisManager{
     }
 
     public sendAndAwait(message: MessageToEngine){
-        return new Promise<MessageFromOrderbook>((resolve)=>{
+        return new Promise<MessageFromOrderbook>(async (resolve)=>{
             const id = this.getRandomClientId();
-            this.client.subscribe(id,(message)=>{
+            await this.client.subscribe(id,(message)=>{
                 this.client.unsubscribe(id);
                 resolve(JSON.parse(message));
 
             });
-            this.publisher.lPush("message", JSON.stringify({clientId: id, message}));
+            await this.publisher.lPush("message", JSON.stringify({clientId: id, message}));
         });
     }
 

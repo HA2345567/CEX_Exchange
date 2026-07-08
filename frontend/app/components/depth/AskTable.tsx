@@ -15,7 +15,7 @@ export const AskTable = (
     askWithTotal.reverse();
 
     return <div>
-        {askWithTotal.map(([price, quantity, total]) => <Ask maxTotal={maxTotal} price={price} quantity={quantity} total={total} />)}
+        {askWithTotal.map(([price, quantity, total]) => <Ask key={price} maxTotal={maxTotal} price={price} quantity={quantity} total={total} />)}
 
     </div>
 }
@@ -33,21 +33,21 @@ function Ask({ price, quantity, total, maxTotal }: { price: string, quantity: st
             style={{
                 position: "absolute",
                 top: 0,
-                left: 0,
+                right: 0,
                 width: `${(100 * total) / maxTotal}%`,
                 height: "100%",
-                background: "rgba(228,75,68,0.325)",
+                background: "rgba(239, 68, 68, 0.08)",
                 transition: "width 0.3s ease-in-out",
             }}></div>
 
-        <div className="flex justify-between text-xs w-full">
-            <div>
+        <div className="flex justify-between text-xs w-full px-2 py-1 z-10 font-mono">
+            <div className="w-1/3 text-left text-red-500 font-semibold">
                 {price}
             </div>
-            <div>
+            <div className="w-1/3 text-right text-slate-300">
                 {quantity}
             </div>
-            <div>
+            <div className="w-1/3 text-right text-slate-400">
                 {total?.toFixed(2)}
             </div>
 

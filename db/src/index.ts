@@ -4,7 +4,7 @@ import type { DbMessage } from './types';
 const pgClient = new Client({
     user: 'your_user',
     host: 'localhost',
-    database: 'my_databse',
+    database: 'my_database',
     password: 'your_password',
     port: 5432,
 })
@@ -25,10 +25,11 @@ async function main(){
                 console.log("adding data");
                 console.log(data);
                 const price = data.data.price;
-                const timestamp = new Date(data.data.timestamp);
-                const query = `INSERT INTO tata_prices(time,price) VALUES($1,$2)`;
+                const timestamp = new Date(Number(data.data.timestamp));
+                const currency = data.data.market.split("_")[1] || 'INR';
+                const query = `INSERT INTO tata_prices(time,price,currency_code) VALUES($1,$2,$3)`;
 
-                const values = [timestamp, price];
+                const values = [timestamp, price, currency];
                 await pgClient.query(query,values);
             }
         }

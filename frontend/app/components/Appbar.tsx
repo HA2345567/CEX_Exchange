@@ -24,7 +24,7 @@ export const Appbar = () => {
             className={`flex cursor-pointer flex-col justify-center pl-8 pt-1 text-sm ${
               route.startsWith("/trade") ? "text-white" : "text-slate-500"
             }`}
-            onClick={() => router.push("/trade")}
+            onClick={() => router.push("/trade/TATA_INR")}
           >
             Trade
           </div>

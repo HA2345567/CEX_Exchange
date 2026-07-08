@@ -32,7 +32,7 @@ orderRouter.get("/open",async (req ,res)=>{
             market: req.query.market as string,
         }
     })
-
+    res.json(response.payload);
 })
 
 orderRouter.delete("/", async(req ,res)=>{

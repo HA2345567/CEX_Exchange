@@ -9,7 +9,7 @@ export const BidTable=(
 
 
         return <div>
-            {bidsWithTotal?.map(([price,quantity,total]) => <Bid maxTotal={maxTotal} total={total} price={price} quantity={quantity}
+            {bidsWithTotal?.map(([price,quantity,total]) => <Bid key={price} maxTotal={maxTotal} total={total} price={price} quantity={quantity}
         />)}
         </div>
 }
@@ -28,22 +28,22 @@ export const BidTable=(
             style={{
                 position:"absolute",
                 top:0,
-                left:0,
+                right:0,
                 width:`${(100*total)/maxTotal}%`,
                 height:"100%",
-                background:"rgba(1, 167,0.325)",
+                background:"rgba(16, 185, 129, 0.08)",
                 transition:"width 0.3s ease-in-out",
             }}>
 
             </div>
-              <div className={`flex justify-between text-xs w-full`}>
-                <div>
+              <div className="flex justify-between text-xs w-full px-2 py-1 z-10 font-mono">
+                <div className="w-1/3 text-left text-green-500 font-semibold">
                     {price}
                 </div>
-                <div>
+                <div className="w-1/3 text-right text-slate-300">
                     {quantity}
                 </div>
-                <div>
+                <div className="w-1/3 text-right text-slate-400">
                     {total?.toFixed(2)}
                 </div>
 
