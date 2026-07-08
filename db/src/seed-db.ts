@@ -12,7 +12,7 @@ async function initializeDB() {
     await client.connect();
 
     await client.query(`
-        DROP TABLE IF EXISTS "tata_prices";
+        DROP TABLE IF EXISTS "tata_prices" CASCADE;
         CREATE TABLE "tata_prices"(
             time            TIMESTAMP WITH TIME ZONE NOT NULL,
             price   DOUBLE PRECISION,
@@ -65,8 +65,33 @@ async function initializeDB() {
         GROUP BY bucket, currency_code;
     `);
 
+    console.log("Generating seed price data...");
+    const now = new Date();
+    for (let i = 200; i >= 0; i--) {
+        const hourTime = now.getTime() - i * 60 * 60 * 1000;
+        const basePrice = 1000 + Math.sin(i / 10) * 15;
+        
+        // Insert 4 points per hour to get distinct open, close, high, and low values
+        for (let j = 0; j < 4; j++) {
+            const time = new Date(hourTime + j * 15 * 60 * 1000);
+            const price = basePrice + (j - 1.5) * (3 + Math.random() * 2) + (Math.random() - 0.5) * 4;
+            const volume = 10 + Math.random() * 50;
+            await client.query(`INSERT INTO tata_prices (time, price, volume, currency_code) VALUES ($1, $2, $3, $4)`, [
+                time,
+                price,
+                volume,
+                'INR'
+            ]);
+        }
+    }
+
+    console.log("Refreshing materialized views...");
+    await client.query('REFRESH MATERIALIZED VIEW klines_1m');
+    await client.query('REFRESH MATERIALIZED VIEW klines_1h');
+    await client.query('REFRESH MATERIALIZED VIEW klines_1w');
+
     await client.end();
-    console.log("Database initialized successfully");
+    console.log("Database initialized and populated successfully");
 }
 
 initializeDB().catch(console.error);

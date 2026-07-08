@@ -300,8 +300,8 @@ export class Engine {
         }
 
         const depth = orderbook.getDepth();
-        const updateBids = depth.bids.filter(x => x[0] === price);
-        const updateAsks = depth.asks.filter(x => x[0] === price);
+        const updateBids = depth.bids.filter(x => Number(x[0]) === Number(price));
+        const updateAsks = depth.asks.filter(x => Number(x[0]) === Number(price));
 
         RedisManager.getInstance().publishMessage(`depth@${market}`, {
             stream: `depth@${market}`,
@@ -319,8 +319,8 @@ export class Engine {
 
         const depth = orderbook.getDepth();
         if (side === "buy") {
-            const updateAsks = depth.asks.filter(x => fills.map(f => f.price).includes(x[0]));
-            const updateBids = depth.bids.find(x => x[0] === price);
+            const updateAsks = depth.asks.filter(x => fills.map(f => Number(f.price)).includes(Number(x[0])));
+            const updateBids = depth.bids.find(x => Number(x[0]) === Number(price));
             console.log("publish ws depth updates")
             RedisManager.getInstance().publishMessage(`depth@${market}`, {
                 stream: `depth@${market}`,
@@ -333,8 +333,8 @@ export class Engine {
         }
 
         if (side === "sell") {
-            const updatedBids = depth.bids.filter(x => fills.map(f => f.price).includes(x[0]));
-            const updateAsks = depth.asks.find(x => x[0] === price);
+            const updatedBids = depth.bids.filter(x => fills.map(f => Number(f.price)).includes(Number(x[0])));
+            const updateAsks = depth.asks.find(x => Number(x[0]) === Number(price));
             console.log("publish ws depth updates")
             RedisManager.getInstance().publishMessage(`depth@${market}`, {
                 stream: `depth@${market}`,

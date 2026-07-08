@@ -21,26 +21,41 @@ export const MarketBar = ({ market }: { market: string }) => {
 
     useEffect(() => {
         getTicker(market).then(setTicker);
-        SignalingManager.getInstance().registerCallback("ticker", (data: Partial<MarketTicker>) =>
-            setTicker((prevTicker) => ({
-                firstPrice: data?.firstPrice ?? prevTicker?.firstPrice ?? "",
-                high: data?.high ?? prevTicker?.high ?? "",
-                lastPrice: data?.lastPrice ?? prevTicker?.lastPrice ?? "",
-                low: data?.low ?? prevTicker?.low ?? "",
-                priceChange: data?.priceChange ?? prevTicker?.priceChange ?? "",
-                priceChangePercent: data?.priceChangePercent ?? prevTicker?.priceChangePercent ?? "",
-                quoteVolume: data?.quoteVolume ?? prevTicker?.quoteVolume ?? "",
-                symbol: data?.symbol ?? prevTicker?.symbol ?? "",
-                trades: data?.trades ?? prevTicker?.trades ?? "",
-                volume: data?.volume ?? prevTicker?.volume ?? "",
-            })),
-            `TICKER-${market}`,
-        );
-        SignalingManager.getInstance().sendMessage({"method":"SUBSCRIBE","params":[`ticker.${market}`]}	);
+
+        SignalingManager.getInstance().registerCallback("trade", (data: any) => {
+            setTicker((prevTicker) => {
+                if (!prevTicker) return null;
+                const newPrice = Number(data.price);
+                const prevHigh = Number(prevTicker.high) || 0;
+                const prevLow = Number(prevTicker.low) || 0;
+                const prevVolume = Number(prevTicker.volume) || 0;
+                const qty = Number(data.quantity) || 0;
+                
+                const newHigh = prevHigh === 0 ? newPrice : Math.max(prevHigh, newPrice);
+                const newLow = prevLow === 0 ? newPrice : Math.min(prevLow, newPrice);
+                const newVolume = prevVolume + qty;
+
+                const firstPrice = Number(prevTicker.firstPrice) || newPrice;
+                const priceChange = newPrice - firstPrice;
+                const priceChangePercent = firstPrice === 0 ? 0 : (priceChange / firstPrice) * 100;
+                
+                return {
+                    ...prevTicker,
+                    lastPrice: data.price,
+                    high: newHigh.toString(),
+                    low: newLow.toString(),
+                    volume: newVolume.toString(),
+                    priceChange: priceChange.toFixed(2),
+                    priceChangePercent: priceChangePercent.toFixed(2),
+                };
+            });
+        }, `TRADE-BAR-${market}`);
+
+        SignalingManager.getInstance().sendMessage({"method":"SUBSCRIBE","params":[`trade@${market}`]});
 
         return () => {
-            SignalingManager.getInstance().deRegisterCallback("ticker", `TICKER-${market}`);
-            SignalingManager.getInstance().sendMessage({"method":"UNSUBSCRIBE","params":[`ticker.${market}`]}	);
+            SignalingManager.getInstance().deRegisterCallback("trade", `TRADE-BAR-${market}`);
+            SignalingManager.getInstance().sendMessage({"method":"UNSUBSCRIBE","params":[`trade@${market}`]});
         }
     }, [market])
     // 
